@@ -1,3 +1,4 @@
 # Cache and temporary files
 .cache/
 *.metadata
+upload_all.ps1
