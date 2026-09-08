@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniSplat 3D — Drone 3D Reconstruction & 3D Print Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Three.js and OrbitControls for 3D Viewport -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <!-- Top Modern Navigation Bar -->
+    <header class="app-header">
+        <div class="brand-container">
+            <div class="brand-logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="url(#brandGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                        <linearGradient id="brandGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#38bdf8"/>
+                            <stop offset="1" stop-color="#6366f1"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="brand-info">
+                <h1>OmniSplat <span>3D</span> <span class="badge-tag">AI 3D & PRINT</span></h1>
+                <p>Drone 3D Digital Twin & Solid 3D Print Studio</p>
+            </div>
+        </div>
+
+        <!-- Geospatial Telemetry HUD -->
+        <div class="header-hud">
+            <div class="hud-pill">
+                <span class="hud-dot"></span>
+                <span class="hud-label">LOCATION:</span>
+                <span class="hud-val" id="hudLocation">Halde Duhamel, Germany</span>
+            </div>
+            <div class="hud-pill">
+                <span class="hud-label">GPS:</span>
+                <span class="hud-val mono" id="hudCoords">49°15'04.2"N 6°47'54.8"E</span>
+            </div>
+            <div class="hud-pill">
+                <span class="hud-label">ELEVATION:</span>
+                <span class="hud-val mono" id="hudElevation">360m MSL</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <div class="status-pill ready" id="systemStatusChip">
+                <span class="status-indicator pulse"></span>
+                <span>Photoreal 3D Active</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Studio Grid -->
+    <main class="studio-grid">
+        <!-- LEFT COLUMN: Video Ingestion & Flight Data -->
+        <aside class="sidebar-panel">
+            <!-- Source Video & Dataset Selector -->
+            <div class="studio-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 7l-7 5 7 5V7z"/>
+                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                        </svg>
+                        <h2>Drone Flight Video</h2>
+                    </div>
+                    <span class="type-pill">MULTI-SEQUENCE</span>
+                </div>
+
+                <div class="card-content">
+                    <!-- Dropzone -->
+                    <div class="modern-dropzone" id="dropZone">
+                        <input type="file" id="videoFileInput" accept="video/*" hidden>
+                        <div class="drop-illustration">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                        </div>
+                        <p class="drop-main-text">Upload Custom Video or Select Dataset</p>
+                        <p class="drop-sub-text">Drone flyover, orbit pass, phone video</p>
+                        <button class="btn btn-secondary btn-sm" id="browseBtn" type="button">Browse Local Video</button>
+                    </div>
+
+                    <!-- Video Dataset Selector -->
+                    <div class="dataset-select-wrapper">
+                        <label class="dataset-select-label" for="datasetSelect">
+                            <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+                                <line x1="7" y1="2" x2="7" y2="22"/>
+                                <line x1="17" y1="2" x2="17" y2="22"/>
+                                <line x1="2" y1="12" x2="22" y2="12"/>
+                            </svg>
+                            <span>Saarpolygon Drone Videos:</span>
+                        </label>
+                        <select class="dataset-dropdown" id="datasetSelect">
+                            <option value="saarpolygon_all_1952_images_30fps.mp4" selected>🌟 Master Video (All 1,952 Images • 30 FPS • 1m 05s)</option>
+                            <option value="saarpolygon_first_300_frames_30fps.mp4">🎬 First 300 Frames (30 FPS • 10.0s)</option>
+                            <option value="saarpolygon_first_200_frames_30fps.mp4">🎬 First 200 Frames (30 FPS • 6.7s)</option>
+                            <option value="saarpolygon_first_100_frames_30fps.mp4">🎬 First 100 Frames (30 FPS • 3.3s)</option>
+                            <option value="saarpolygon_best_100_frames.mp4">🎯 Sharpest 100 Keyframes (12 FPS Orbit)</option>
+                            <option value="saarpolygon_100frames_24fps.mp4">⚡ 100 Keyframes (24 FPS Orbit)</option>
+                            <option value="saarpolygon_progressive_buildup_30fps.mp4">🔄 Progressive Buildup Loop (47.2s)</option>
+                        </select>
+                        <button class="btn btn-demo full-width" id="loadDatasetBtn" type="button">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                            Load Selected Video & 3D Model
+                        </button>
+                    </div>
+
+                    <!-- Video Preview Player -->
+                    <div class="preview-container" id="videoPreviewWrapper">
+                        <video id="videoPreview" controls muted playsinline></video>
+                        <div class="meta-strip">
+                            <span class="meta-item"><strong id="metaRes">1920x1080</strong></span>
+                            <span class="meta-item"><strong id="metaDuration">65.1s</strong></span>
+                            <span class="meta-item"><strong id="metaFps">30 FPS</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reconstruction & Camera Tracking Settings -->
+            <div class="studio-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        <h2>Photogrammetry Pipeline</h2>
+                    </div>
+                </div>
+
+                <div class="card-content">
+                    <div class="control-row">
+                        <div class="control-label">
+                            <span>Keyframe Decimation</span>
+                            <span class="control-bubble" id="keyframeVal">40</span>
+                        </div>
+                        <input type="range" class="clean-slider" id="keyframeRange" min="20" max="100" value="40">
+                    </div>
+
+                    <div class="control-row">
+                        <div class="control-label">
+                            <span>SfM & Splat Refinement</span>
+                            <span class="control-bubble" id="iterVal">200</span>
+                        </div>
+                        <input type="range" class="clean-slider" id="iterRange" min="50" max="500" step="25" value="200">
+                    </div>
+
+                    <button class="btn btn-primary full-width mt-3" id="startBtn">
+                        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        <span>Reconstruct 3D Digital Twin</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 1,952 Drone Frames Photogrammetry Intelligence Card -->
+            <div class="studio-card" id="droneIntelCard">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                        <h2>Drone Intelligence</h2>
+                    </div>
+                    <span class="type-pill">1,952 FRAMES</span>
+                </div>
+                <div class="card-content">
+                    <div class="intel-banner">
+                        <div class="intel-stat">
+                            <span class="intel-num">1,952</span>
+                            <span class="intel-lbl">Total Frames</span>
+                        </div>
+                        <div class="intel-stat">
+                            <span class="intel-num">10</span>
+                            <span class="intel-lbl">Flight Passes</span>
+                        </div>
+                        <div class="intel-stat">
+                            <span class="intel-num">360°</span>
+                            <span class="intel-lbl">Full Cylinder</span>
+                        </div>
+                    </div>
+                    <p class="intel-desc">
+                        Full spatial twin reconstructed from 10 DJI drone flight sequences (DJI_0252–0261). 
+                        No flat image merging: authentic 3-segment non-planar spatial "Z" polygon with walk-through pylons and 38.2m sky bridge.
+                    </p>
+                    <div class="mission-chips">
+                        <span class="m-chip" title="DJI_0252: 12 frames (Approach)">0252 (Approach)</span>
+                        <span class="m-chip" title="DJI_0253: 245 frames (Low Orbit)">0253 (Low 360°)</span>
+                        <span class="m-chip" title="DJI_0254: 75 frames (4K UHD)">0254 (4K Apex)</span>
+                        <span class="m-chip" title="DJI_0255: 416 frames (Mid Orbit)">0255 (Mid 360°)</span>
+                        <span class="m-chip" title="DJI_0256: 411 frames (High Orbit)">0256 (High 360°)</span>
+                        <span class="m-chip" title="DJI_0257: 329 frames (Deck Pass)">0257 (Deck Top)</span>
+                        <span class="m-chip" title="DJI_0260: 178 frames (Landscape)">0260 (Terrace)</span>
+                        <span class="m-chip" title="DJI_0261: 191 frames (Sunset)">0261 (Golden Hr)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Execution Telemetry & Live Terminal -->
+            <div class="studio-card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                        <h2>System Console</h2>
+                    </div>
+                    <span class="stage-badge" id="stageTag">READY</span>
+                </div>
+
+                <div class="card-content">
+                    <div class="progress-wrap">
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressBarFill" style="width: 100%;"></div>
+                        </div>
+                        <div class="progress-details">
+                            <span class="pct-num" id="progressPct">100%</span>
+                            <span class="status-summary" id="progressMsg">Photorealistic 3D Model Active</span>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-stepper">
+                        <div class="step-node completed" id="step1">
+                            <div class="node-dot">1</div>
+                            <span>Extraction</span>
+                        </div>
+                        <div class="step-node completed" id="step2">
+                            <div class="node-dot">2</div>
+                            <span>Camera Poses</span>
+                        </div>
+                        <div class="step-node completed" id="step3">
+                            <div class="node-dot">3</div>
+                            <span>3DGS Mesh</span>
+                        </div>
+                        <div class="step-node completed" id="step4">
+                            <div class="node-dot">4</div>
+                            <span>Photoreal Twin</span>
+                        </div>
+                    </div>
+
+                    <div class="clean-terminal" id="terminalBox">
+                        <div class="log-row info">OmniSplat 3D Engine initialized. Ready to explore.</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RIGHT COLUMN: 3D Viewport Studio -->
+        <section class="viewport-panel">
+            <div class="viewport-container">
+                <!-- Top Viewport Control Bar -->
+                <div class="viewport-toolbar">
+                    <div class="toolbar-left">
+                        <span class="viewport-title">3D Viewport Studio</span>
+                        <span class="stats-badge" id="modelStatsBadge">Saarpolygon Landmark • Photorealistic PBR Twin</span>
+                        <span class="print-spec-badge" id="printSpecBadge">🖨️ 3D Printable: 100% Watertight • 184 × 160 × 114 mm</span>
+                    </div>
+
+                    <div class="toolbar-right">
+                        <!-- Render Mode Selector -->
+                        <div class="segmented-control" id="renderModeControl">
+                            <button class="seg-btn active" id="btnModePrintResin" title="Solid 3D Print Physical Resin Prototype">🖨️ 3D Print Resin</button>
+                            <button class="seg-btn" id="btnModeSlicerLayers" title="Simulate 0.16mm 3D Printing Layer Lines">🧱 Slicer Layers</button>
+                            <button class="seg-btn" id="btnModeGaussians" title="Dense Continuous Gaussian Splats">✨ 3DGS Splats</button>
+                        </div>
+
+                        <!-- Atmospheric Time of Day -->
+                        <div class="segmented-control" id="timeOfDayControl">
+                            <button class="seg-btn active" id="btnTimeDay" title="Clear Midday Sun">☀️ Day</button>
+                            <button class="seg-btn" id="btnTimeGolden" title="Warm Golden Hour Sunset">🌅 Sunset</button>
+                            <button class="seg-btn" id="btnTimeNight" title="Night Illumination Floodlights">🌙 Night</button>
+                        </div>
+
+                        <!-- 3D Printer Bed Grid Toggle -->
+                        <button class="icon-btn" id="btnToggleBuildPlate" title="Toggle 3D Printer Build Plate Bed">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="3" y1="9" x2="21" y2="9"/>
+                                <line x1="3" y1="15" x2="21" y2="15"/>
+                                <line x1="9" y1="3" x2="9" y2="21"/>
+                                <line x1="15" y1="3" x2="15" y2="21"/>
+                            </svg>
+                            <span>Print Bed</span>
+                        </button>
+
+                        <!-- Camera Path Toggle -->
+                        <button class="icon-btn active" id="btnToggleTrajectory" title="Toggle Camera Flight Path">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="8" x2="12" y2="12"/>
+                                <line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span>Flight Path</span>
+                        </button>
+
+                        <!-- Auto-Rotate Turntable -->
+                        <button class="icon-btn" id="btnAutoRotate" title="Cinematic 360° Drone Orbit">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                            </svg>
+                            <span>Drone Orbit</span>
+                        </button>
+
+                        <!-- Reset Camera View -->
+                        <button class="icon-btn" id="btnResetCam" title="Reset Viewpoint">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                <path d="M3 3v5h5"/>
+                            </svg>
+                            <span>Reset</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- WebGL 3D Canvas Container -->
+                <div class="canvas-box" id="canvasWrapper">
+                    <div class="canvas-empty-state" id="canvasPlaceholder">
+                        <div class="empty-icon-glow">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                                <line x1="12" y1="22.08" x2="12" y2="12"/>
+                            </svg>
+                        </div>
+                        <h3>3D Engine Standby</h3>
+                        <p>Loading photorealistic terrain & landmark...</p>
+                    </div>
+
+                    <!-- Interactive Compass Rose Overlay -->
+                    <div class="compass-widget" id="compassWidget" title="Click to align camera to True North">
+                        <div class="compass-dial" id="compassDial">
+                            <div class="compass-needle-n">N</div>
+                            <div class="compass-needle-s">S</div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Real-Time Camera Telemetry Overlay -->
+                    <div class="telemetry-overlay" id="telemetryOverlay">
+                        <span>HDG: <strong id="teleHeading">042° NE</strong></span>
+                        <span>TILT: <strong id="teleTilt">34°</strong></span>
+                        <span>ALT: <strong id="teleAlt">388m</strong></span>
+                    </div>
+                </div>
+
+                <!-- Bottom Measurement & Export Bar -->
+                <div class="viewport-footer">
+                    <div class="measure-deck">
+                        <span class="tool-deck-label">MEASURE:</span>
+                        <button class="tool-pill" id="toolMeasureDist">
+                            📏 3D Distance
+                        </button>
+                        <button class="tool-pill" id="toolMeasureHeight">
+                            📐 Height
+                        </button>
+                        <span class="measure-feedback" id="measureResult">Click any 2 points on the solid 3D model</span>
+                    </div>
+
+                    <div class="export-deck">
+                        <a href="/api/download/stl" class="btn btn-stl" id="downloadStlBtn" download title="Download 3D-printable STL for Cura / Bambu / Prusa Slicers">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            <strong>Download 3D Print (.STL)</strong>
+                        </a>
+                        <a href="/api/download/obj" class="btn btn-obj" id="downloadObjBtn" download title="Download Wavefront OBJ 3D Textured Mesh">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Mesh (.OBJ)
+                        </a>
+                        <a href="/api/download/ply" class="btn btn-download" id="downloadPlyBtn" download title="Download 3D Gaussian Splatting PLY">
+                            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            3DGS (.PLY)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

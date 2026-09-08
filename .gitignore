@@ -2,3 +2,18 @@
 .cache/
 *.metadata
 upload_all.ps1
+
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.env
+.venv
+env/
+venv/
+
+# Run session caches
+workspace/outputs/session_*
+workspace/uploads/*
+!workspace/uploads/.gitkeep
