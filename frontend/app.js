@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hudCoords = document.getElementById('hudCoords');
     const hudElevation = document.getElementById('hudElevation');
 
-    const btnModeRGB = document.getElementById('btnModeRGB');
+    const btnModePhotoreal = document.getElementById('btnModePhotoreal');
     const btnModePrintResin = document.getElementById('btnModePrintResin');
     const btnModeSlicerLayers = document.getElementById('btnModeSlicerLayers');
     const btnModeGaussians = document.getElementById('btnModeGaussians');
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isAutoRotating = true; // Auto-rotate on by default for full 360 view
     let showTrajectory = true;
     let showBuildPlate = false; // Off by default in Google Earth mode
-    let currentRenderMode = 'rgb'; // 'rgb', 'resin', 'slicer', 'gaussians'
+    let currentRenderMode = 'resin'; // 'resin', 'slicer', 'gaussians'
     let currentTimeMode = 'day'; // 'day', 'golden', 'night'
 
     // Three.js Objects
@@ -143,9 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.outputEncoding = THREE.sRGBEncoding;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.15;
+        renderer.toneMappingExposure = 1.1;
         canvasWrapper.appendChild(renderer.domElement);
 
         controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -233,9 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function createHorizonTerrain() {
         const horizonGeo = new THREE.PlaneGeometry(350, 350, 32, 32);
         const horizonMat = new THREE.MeshStandardMaterial({
-            color: 0x4a5342,
-            roughness: 0.92,
-            metalness: 0.04
+            color: 0x3d4349,
+            roughness: 0.9,
+            metalness: 0.05
         });
         horizonMesh = new THREE.Mesh(horizonGeo, horizonMat);
         horizonMesh.rotation.x = -Math.PI / 2;
@@ -278,54 +277,53 @@ document.addEventListener('DOMContentLoaded', () => {
         texSteel = loader.load('/assets/textures/steel_corten.jpg');
         texSteel.wrapS = texSteel.wrapT = THREE.RepeatWrapping;
         texSteel.repeat.set(3, 3);
-        texSteel.encoding = THREE.sRGBEncoding;
 
         texTerrain = loader.load('/assets/textures/terrain_halde.jpg');
         texTerrain.wrapS = texTerrain.wrapT = THREE.RepeatWrapping;
         texTerrain.repeat.set(5, 5);
-        texTerrain.encoding = THREE.sRGBEncoding;
 
         texConcrete = loader.load('/assets/textures/concrete_footing.jpg');
         texConcrete.wrapS = texConcrete.wrapT = THREE.RepeatWrapping;
         texConcrete.repeat.set(2, 2);
-        texConcrete.encoding = THREE.sRGBEncoding;
 
         // Material 0: Terrain (Halde Duhamel Gravel Terrace & Conical Slope)
         const matTerrain = new THREE.MeshStandardMaterial({
             map: texTerrain,
-            color: 0xffffff,
-            roughness: 0.85,
-            metalness: 0.04
+            roughness: 0.88,
+            metalness: 0.05,
+            vertexColors: true
         });
 
         // Material 1: Concrete (Foundation Blocks & Base Entry Stairs)
         const matConcrete = new THREE.MeshStandardMaterial({
             map: texConcrete,
-            color: 0xffffff,
-            roughness: 0.68,
-            metalness: 0.06
+            roughness: 0.70,
+            metalness: 0.08,
+            vertexColors: true
         });
 
-        // Material 2: Steel (Weathered Corten architectural steel with authentic rust orange/amber RGB)
+        // Material 2: Steel (Hot-dip galvanized & weathered Corten architectural steel)
         const matSteel = new THREE.MeshStandardMaterial({
             map: texSteel,
-            color: 0xffffff,
-            roughness: 0.38,
-            metalness: 0.35
+            roughness: 0.44,
+            metalness: 0.42,
+            vertexColors: true
         });
 
         // Material 3: Deck (Walkway observation grating floor)
         const matDeck = new THREE.MeshStandardMaterial({
-            color: 0x2e3640,
-            roughness: 0.58,
-            metalness: 0.42
+            color: 0x334155,
+            roughness: 0.65,
+            metalness: 0.35,
+            vertexColors: true
         });
 
         // Material 4: Railing (Stainless safety balustrades and mesh)
         const matRailing = new THREE.MeshStandardMaterial({
-            color: 0xf1f5f9,
-            roughness: 0.18,
-            metalness: 0.85
+            color: 0xcfd8dc,
+            roughness: 0.25,
+            metalness: 0.72,
+            vertexColors: true
         });
 
         pbrMaterials = [matTerrain, matConcrete, matSteel, matDeck, matRailing];
@@ -431,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Select active material based on render mode
-            const activeMats = (currentRenderMode === 'rgb' || currentRenderMode === 'photoreal') ? pbrMaterials :
+            const activeMats = (currentRenderMode === 'photoreal') ? pbrMaterials :
                               (currentRenderMode === 'resin') ? resinMaterials : slicerMaterials;
 
             solidMesh = new THREE.Mesh(geometry, activeMats);
@@ -507,20 +505,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
     function setRenderMode(mode) {
         currentRenderMode = mode;
-        if (btnModeRGB) btnModeRGB.classList.remove('active');
+        if (btnModePhotoreal) btnModePhotoreal.classList.remove('active');
         if (btnModePrintResin) btnModePrintResin.classList.remove('active');
         if (btnModeSlicerLayers) btnModeSlicerLayers.classList.remove('active');
         if (btnModeGaussians) btnModeGaussians.classList.remove('active');
 
-        if (mode === 'rgb' || mode === 'photoreal') {
-            if (btnModeRGB) btnModeRGB.classList.add('active');
+        if (mode === 'photoreal') {
+            if (btnModePhotoreal) btnModePhotoreal.classList.add('active');
             if (solidMesh) {
                 solidMesh.visible = true;
                 solidMesh.material = pbrMaterials;
             }
             if (pointCloudMesh) pointCloudMesh.visible = false;
             if (horizonMesh) horizonMesh.visible = true;
-            logTerminal('[VIEWPORT] Mode: 🎨 Photorealistic RGB (Multi-PBR Textures & Architectural Materials).', 'info');
+            logTerminal('[VIEWPORT] Mode: Multi-PBR Architectural Materials.', 'info');
         } else if (mode === 'resin') {
             if (btnModePrintResin) btnModePrintResin.classList.add('active');
             if (solidMesh) {
@@ -545,11 +543,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 pointCloudMesh.visible = true;
             }
-            logTerminal('[VIEWPORT] Mode: ✨ 3D Point Cloud.', 'info');
+            logTerminal('[VIEWPORT] Mode: ✨ 3DGS Volumetric Splats.', 'info');
         }
     }
 
-    if (btnModeRGB) btnModeRGB.addEventListener('click', () => setRenderMode('rgb'));
+    if (btnModePhotoreal) btnModePhotoreal.addEventListener('click', () => setRenderMode('photoreal'));
     if (btnModePrintResin) btnModePrintResin.addEventListener('click', () => setRenderMode('resin'));
     if (btnModeSlicerLayers) btnModeSlicerLayers.addEventListener('click', () => setRenderMode('slicer'));
     if (btnModeGaussians) btnModeGaussians.addEventListener('click', () => setRenderMode('gaussians'));

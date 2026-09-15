@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20260915_rgb_final">
+    <link rel="stylesheet" href="styles.css?v=20260915_clean_prototype">
     <!-- Three.js and OrbitControls for 3D Viewport -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -277,10 +277,9 @@
                     <div class="toolbar-right">
                         <!-- Render Mode Selector -->
                         <div class="segmented-control" id="renderModeControl">
-                            <button class="seg-btn active" id="btnModeRGB" title="Full Photorealistic RGB Textures & Colors">🎨 Real RGB</button>
-                            <button class="seg-btn" id="btnModePrintResin" title="Solid 3D Print Physical Resin Prototype">🖨️ 3D Print Resin</button>
+                            <button class="seg-btn active" id="btnModePrintResin" title="Solid 3D Print Physical Resin Prototype">🖨️ 3D Print Resin</button>
                             <button class="seg-btn" id="btnModeSlicerLayers" title="Simulate 0.16mm 3D Printing Layer Lines">🧱 Slicer Layers</button>
-                            <button class="seg-btn" id="btnModeGaussians" title="Dense Continuous Point Cloud">✨ 3D Point Cloud</button>
+                            <button class="seg-btn" id="btnModeGaussians" title="Dense Continuous Gaussian Splats">✨ 3DGS Splats</button>
                         </div>
 
                         <!-- Atmospheric Time of Day -->
@@ -407,6 +406,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=20260915_rgb_final"></script>
+    <script src="app.js?v=20260915_clean_prototype"></script>
 </body>
 </html>
