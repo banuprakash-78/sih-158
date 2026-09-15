@@ -4,6 +4,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-green.svg)](https://fastapi.tiangolo.com/)
 [![Three.js](https://img.shields.io/badge/Three.js-WebGL-black.svg)](https://threejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Vercel](https://img.shields.io/badge/Vercel-drone--3d.vercel.app-black?logo=vercel)](https://drone-3d.vercel.app/)
 
 > **OmniSplat 3D** is an end-to-end photogrammetry and 3D reconstruction studio that transforms raw drone survey video footage into interactive WebGL 3D models, dense 3D point clouds, and 3D-printable watertight meshes (`.obj`, `.stl`, `.ply`).
 
