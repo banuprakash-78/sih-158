@@ -293,25 +293,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // Material 0: Terrain (Halde Duhamel Gravel Terrace & Conical Slope)
         const matTerrain = new THREE.MeshStandardMaterial({
             map: texTerrain,
-            color: 0x939d84,
-            roughness: 0.88,
+            color: 0xffffff,
+            roughness: 0.85,
             metalness: 0.04
         });
 
         // Material 1: Concrete (Foundation Blocks & Base Entry Stairs)
         const matConcrete = new THREE.MeshStandardMaterial({
             map: texConcrete,
-            color: 0xe0dad0,
-            roughness: 0.70,
+            color: 0xffffff,
+            roughness: 0.68,
             metalness: 0.06
         });
 
         // Material 2: Steel (Weathered Corten architectural steel with authentic rust orange/amber RGB)
         const matSteel = new THREE.MeshStandardMaterial({
             map: texSteel,
-            color: 0xc45c1e,
-            roughness: 0.40,
-            metalness: 0.36
+            color: 0xffffff,
+            roughness: 0.38,
+            metalness: 0.35
         });
 
         // Material 3: Deck (Walkway observation grating floor)
