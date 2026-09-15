@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!res.ok) throw new Error('Mesh endpoint returned ' + res.status);
             const data = await res.json();
 
-            canvasPlaceholder.style.display = 'none';
+            if (canvasPlaceholder) canvasPlaceholder.style.display = 'none';
 
             if (solidMesh) scene.remove(solidMesh);
             if (pointCloudMesh) scene.remove(pointCloudMesh);
@@ -458,9 +458,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const dims = data.dimensions.scale_1_to_250_dimensions_mm;
             printSpecBadge.textContent = `🖨️ 3D Printable: 100% Watertight • ${dims[0]}×${dims[2]}×${dims[1]} mm`;
 
-            const canvasPlaceholder = document.getElementById('canvasPlaceholder');
-            if (canvasPlaceholder) canvasPlaceholder.style.display = 'none';
-
             downloadStlBtn.classList.remove('disabled');
             downloadObjBtn.classList.remove('disabled');
             downloadPlyBtn.classList.remove('disabled');
@@ -497,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const splatMat = new THREE.PointsMaterial({ size: 0.35, vertexColors: true, sizeAttenuation: true });
             pointCloudMesh = new THREE.Points(geometry, splatMat);
             scene.add(pointCloudMesh);
-            canvasPlaceholder.style.display = 'none';
+            if (canvasPlaceholder) canvasPlaceholder.style.display = 'none';
         } catch (e) {
             console.error(e);
         }
