@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20260915_clean_prototype">
+    <link rel="stylesheet" href="styles.css?v=1789469715">
     <!-- Three.js and OrbitControls for 3D Viewport -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -166,7 +166,7 @@
                         <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <polygon points="5 3 19 12 5 21 5 3"/>
                         </svg>
-                        <span>Reconstruct 3D Digital Twin</span>
+                        <span>Generate 3D Model</span>
                     </button>
                 </div>
             </div>
@@ -223,41 +223,41 @@
                         </svg>
                         <h2>System Console</h2>
                     </div>
-                    <span class="stage-badge" id="stageTag">READY</span>
+                    <span class="stage-badge" id="stageTag">STANDBY</span>
                 </div>
 
                 <div class="card-content">
                     <div class="progress-wrap">
                         <div class="progress-track">
-                            <div class="progress-fill" id="progressBarFill" style="width: 100%;"></div>
+                            <div class="progress-fill" id="progressBarFill" style="width: 0%;"></div>
                         </div>
                         <div class="progress-details">
-                            <span class="pct-num" id="progressPct">100%</span>
-                            <span class="status-summary" id="progressMsg">Photorealistic 3D Model Active</span>
+                            <span class="pct-num" id="progressPct">0%</span>
+                            <span class="status-summary" id="progressMsg">Awaiting drone video ingestion</span>
                         </div>
                     </div>
 
                     <div class="pipeline-stepper">
-                        <div class="step-node completed" id="step1">
+                        <div class="step-node" id="step1">
                             <div class="node-dot">1</div>
                             <span>Extraction</span>
                         </div>
-                        <div class="step-node completed" id="step2">
+                        <div class="step-node" id="step2">
                             <div class="node-dot">2</div>
                             <span>Camera Poses</span>
                         </div>
-                        <div class="step-node completed" id="step3">
+                        <div class="step-node" id="step3">
                             <div class="node-dot">3</div>
                             <span>3DGS Mesh</span>
                         </div>
-                        <div class="step-node completed" id="step4">
+                        <div class="step-node" id="step4">
                             <div class="node-dot">4</div>
                             <span>Photoreal Twin</span>
                         </div>
                     </div>
 
                     <div class="clean-terminal" id="terminalBox">
-                        <div class="log-row info">OmniSplat 3D Engine initialized. Ready to explore.</div>
+                        <div class="log-row info">OmniSplat 3D Engine ready. Upload or select a video, then click 'Generate 3D Model'.</div>
                     </div>
                 </div>
             </div>
@@ -270,8 +270,8 @@
                 <div class="viewport-toolbar">
                     <div class="toolbar-left">
                         <span class="viewport-title">3D Viewport Studio</span>
-                        <span class="stats-badge" id="modelStatsBadge">Saarpolygon Landmark • Photorealistic PBR Twin</span>
-                        <span class="print-spec-badge" id="printSpecBadge">🖨️ 3D Printable: 100% Watertight • 184 × 160 × 114 mm</span>
+                        <span class="stats-badge" id="modelStatsBadge">3D Viewport Studio • Standby</span>
+                        <span class="print-spec-badge" id="printSpecBadge">🖨️ 3D Printable • Generates upon reconstruction</span>
                     </div>
 
                     <div class="toolbar-right">
@@ -340,8 +340,8 @@
                                 <line x1="12" y1="22.08" x2="12" y2="12"/>
                             </svg>
                         </div>
-                        <h3>3D Engine Standby</h3>
-                        <p>Loading photorealistic terrain & landmark...</p>
+                        <h3>3D Model Standby</h3>
+                        <p>Upload a drone video or select a dataset, then click 'Generate 3D Model'</p>
                     </div>
 
                     <!-- Interactive Compass Rose Overlay -->
@@ -376,7 +376,7 @@
                     </div>
 
                     <div class="export-deck">
-                        <a href="/api/download/stl" class="btn btn-stl" id="downloadStlBtn" download title="Download 3D-printable STL for Cura / Bambu / Prusa Slicers">
+                        <a href="/api/download/stl" class="btn btn-stl disabled" id="downloadStlBtn" download title="Download 3D-printable STL for Cura / Bambu / Prusa Slicers">
                             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
                                 <polyline points="7 10 12 15 17 10"/>
@@ -384,7 +384,7 @@
                             </svg>
                             <strong>Download 3D Print (.STL)</strong>
                         </a>
-                        <a href="/api/download/obj" class="btn btn-obj" id="downloadObjBtn" download title="Download Wavefront OBJ 3D Textured Mesh">
+                        <a href="/api/download/obj" class="btn btn-obj disabled" id="downloadObjBtn" download title="Download Wavefront OBJ 3D Textured Mesh">
                             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                 <polyline points="7 10 12 15 17 10"/>
@@ -392,7 +392,7 @@
                             </svg>
                             Mesh (.OBJ)
                         </a>
-                        <a href="/api/download/ply" class="btn btn-download" id="downloadPlyBtn" download title="Download 3D Gaussian Splatting PLY">
+                        <a href="/api/download/ply" class="btn btn-download disabled" id="downloadPlyBtn" download title="Download 3D Gaussian Splatting PLY">
                             <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                                 <polyline points="7 10 12 15 17 10"/>
@@ -406,6 +406,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=20260915_clean_prototype"></script>
+    <script src="app.js?v=1789469715"></script>
 </body>
 </html>

@@ -458,6 +458,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const dims = data.dimensions.scale_1_to_250_dimensions_mm;
             printSpecBadge.textContent = `🖨️ 3D Printable: 100% Watertight • ${dims[0]}×${dims[2]}×${dims[1]} mm`;
 
+            const canvasPlaceholder = document.getElementById('canvasPlaceholder');
+            if (canvasPlaceholder) canvasPlaceholder.style.display = 'none';
+
             downloadStlBtn.classList.remove('disabled');
             downloadObjBtn.classList.remove('disabled');
             downloadPlyBtn.classList.remove('disabled');
@@ -916,8 +919,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (modelStatsBadge && data.location_meta.model_name) modelStatsBadge.textContent = `${data.location_meta.model_name} • Dataset Selected`;
                 }
             }
-            logTerminal(`[DATASET] ${selectedFile} loaded. Rendering 3D digital twin...`, 'info');
-            await loadAndRenderSolidMesh();
+            logTerminal(`[DATASET] ${selectedFile} ready. Click "Generate 3D Model" to reconstruct.`, 'info');
+            stageTag.textContent = 'READY';
+            progressMsg.textContent = `${selectedFile} loaded • Click "Generate 3D Model"`;
         } catch (err) {
             logTerminal(`[INFO] Dataset selected: ${selectedFile}. Ready.`, 'info');
         } finally {
@@ -991,12 +995,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         logTerminal(`[UPLOAD] Ingested drone video: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)...`, 'info');
         logTerminal(`[PREVIEW] Video player ready! Press ▶ Play to review footage.`, 'info');
-        logTerminal(`[READY] Click "Reconstruct 3D Digital Twin" to build 3D mesh.`, 'info');
+        logTerminal(`[READY] Click "Generate 3D Model" to build 3D mesh.`, 'info');
 
         stageTag.textContent = 'READY';
         progressBarFill.style.width = '0%';
         progressPct.textContent = '0%';
-        progressMsg.textContent = `${file.name} ready for 3D reconstruction`;
+        progressMsg.textContent = `${file.name} ready • Click "Generate 3D Model"`;
         activeVideoPath = file.name;
 
         // 2. Background server upload (non-blocking for video preview)
@@ -1026,7 +1030,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isProcessing) return;
         isProcessing = true;
         startBtn.disabled = true;
-        startBtn.innerHTML = `<span>Reconstructing 3D Model...</span>`;
+        startBtn.innerHTML = `<span>Generating 3D Model...</span>`;
         progressBarFill.style.width = '5%';
         progressPct.textContent = '5%';
         progressMsg.textContent = 'Initializing 3D reconstruction pipeline...';
@@ -1106,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(simTimer);
                 isProcessing = false;
                 startBtn.disabled = false;
-                startBtn.innerHTML = `<span>Reconstruct 3D Digital Twin</span>`;
+                startBtn.innerHTML = `<span>Generate 3D Model</span>`;
                 progressBarFill.style.background = 'linear-gradient(90deg, #10b981, #059669)';
                 await loadAndRenderSolidMesh();
             }
@@ -1150,14 +1154,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     sseSource.close();
                     isProcessing = false;
                     startBtn.disabled = false;
-                    startBtn.innerHTML = `<span>Reconstruct 3D Digital Twin</span>`;
+                    startBtn.innerHTML = `<span>Generate 3D Model</span>`;
                     logTerminal(`[SUCCESS] 3D Digital Twin reconstructed! Loading model...`, 'info');
                     await loadAndRenderSolidMesh();
                 } else if (data.status === 'error') {
                     sseSource.close();
                     isProcessing = false;
                     startBtn.disabled = false;
-                    startBtn.innerHTML = `<span>Retry Reconstruction</span>`;
+                    startBtn.innerHTML = `<span>Generate 3D Model</span>`;
                     logTerminal(`[ERROR] Pipeline stopped: ${data.error_message}`, 'error');
                 }
             };
@@ -1196,16 +1200,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------
-    // INITIAL STARTUP: Load Master Video & Google Earth 3D Model
+    // INITIAL STARTUP: Setup 3D Viewport in Standby Mode
     // -------------------------------------------------------------
     init3DViewport();
     loadDroneIntelligence();
     showVideoPreview('/datasets/saarpolygon_all_1952_images_30fps.mp4', 'saarpolygon_all_1952_images_30fps.mp4');
-    loadAndRenderSolidMesh();
-    updateStageIndicators(100);
-    progressBarFill.style.width = '100%';
-    progressPct.textContent = '100%';
-    progressMsg.textContent = 'Photorealistic Google Earth 3D landmark ready.';
-    stageTag.textContent = 'READY';
-    logTerminal('[SYSTEM] Google Earth 3D Digital Twin Studio initialized.', 'info');
+    
+    // Model is NOT loaded on startup: ONLY rendered after clicking 'Generate 3D Model'!
+    updateStageIndicators(0);
+    progressBarFill.style.width = '0%';
+    progressPct.textContent = '0%';
+    progressMsg.textContent = 'Awaiting drone video • Click "Generate 3D Model"';
+    stageTag.textContent = 'STANDBY';
+    if (modelStatsBadge) modelStatsBadge.textContent = '3D Viewport Studio • Standby';
+    if (printSpecBadge) printSpecBadge.textContent = '🖨️ 3D Printable • Generates upon reconstruction';
+    logTerminal('[SYSTEM] OmniSplat 3D Engine ready. Upload video or select dataset, then click "Generate 3D Model".', 'info');
 });
