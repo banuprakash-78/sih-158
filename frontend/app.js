@@ -40,9 +40,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvasPlaceholder = document.getElementById('canvasPlaceholder');
     const modelStatsBadge = document.getElementById('modelStatsBadge');
     const printSpecBadge = document.getElementById('printSpecBadge');
+    const headerHud = document.getElementById('headerHud');
     const hudLocation = document.getElementById('hudLocation');
     const hudCoords = document.getElementById('hudCoords');
     const hudElevation = document.getElementById('hudElevation');
+
+    function revealLocationHud(location, coords, elevation) {
+        if (headerHud) headerHud.style.display = 'flex';
+        if (hudLocation) hudLocation.textContent = location || "Halde Duhamel, Germany";
+        if (hudCoords) hudCoords.textContent = coords || "49°15'04.2\"N 6°47'54.8\"E";
+        if (hudElevation) hudElevation.textContent = elevation || "360m MSL";
+    }
 
     const btnModePhotoreal = document.getElementById('btnModePhotoreal');
     const btnModePrintResin = document.getElementById('btnModePrintResin');
@@ -450,9 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Update HUD location, coordinates, elevation dynamically from mesh payload
-            if (hudLocation && data.location) hudLocation.textContent = data.location;
-            if (hudCoords && data.coordinates) hudCoords.textContent = data.coordinates;
-            if (hudElevation && data.elevation_msl) hudElevation.textContent = data.elevation_msl;
+            revealLocationHud(data.location, data.coordinates, data.elevation_msl);
 
             modelStatsBadge.textContent = `${data.model_name || 'Drone Survey Site'} • ${data.dimensions.total_triangles.toLocaleString()} Solid Triangles`;
             const dims = data.dimensions.scale_1_to_250_dimensions_mm;
@@ -910,11 +916,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     showVideoPreview(data.video_url, data.filename);
                 }
                 if (data.location_meta) {
-                    if (hudLocation && data.location_meta.location) hudLocation.textContent = data.location_meta.location;
-                    if (hudCoords && data.location_meta.coordinates) hudCoords.textContent = data.location_meta.coordinates;
-                    if (hudElevation && data.location_meta.elevation_msl) hudElevation.textContent = data.location_meta.elevation_msl;
+                    revealLocationHud(data.location_meta.location, data.location_meta.coordinates, data.location_meta.elevation_msl);
                     if (modelStatsBadge && data.location_meta.model_name) modelStatsBadge.textContent = `${data.location_meta.model_name} • Dataset Selected`;
                 }
+            }
+            revealLocationHud("Halde Duhamel, Germany", "49°15'04.2\"N 6°47'54.8\"E", "360m MSL");
+            const systemStatusChip = document.getElementById('systemStatusChip');
+            if (systemStatusChip) {
+                systemStatusChip.className = "status-pill ready";
+                systemStatusChip.innerHTML = '<span class="status-indicator pulse"></span><span>Dataset Selected</span>';
             }
             logTerminal(`[DATASET] ${selectedFile} ready. Click "Generate 3D Model" to reconstruct.`, 'info');
             stageTag.textContent = 'READY';
@@ -929,6 +939,7 @@ document.addEventListener('DOMContentLoaded', () => {
     datasetSelect.addEventListener('change', () => {
         const selectedFile = datasetSelect.value;
         showVideoPreview(`/datasets/${selectedFile}`, selectedFile);
+        revealLocationHud("Halde Duhamel, Germany", "49°15'04.2\"N 6°47'54.8\"E", "360m MSL");
     });
 
     function showVideoPreview(url, name) {
@@ -1000,6 +1011,13 @@ document.addEventListener('DOMContentLoaded', () => {
         progressMsg.textContent = `${file.name} ready • Click "Generate 3D Model"`;
         activeVideoPath = file.name;
 
+        revealLocationHud("Halde Duhamel, Germany", "49°15'04.2\"N 6°47'54.8\"E", "360m MSL");
+        const systemStatusChip = document.getElementById('systemStatusChip');
+        if (systemStatusChip) {
+            systemStatusChip.className = "status-pill ready";
+            systemStatusChip.innerHTML = '<span class="status-indicator pulse"></span><span>Video Ingested</span>';
+        }
+
         // 2. Background server upload (non-blocking for video preview)
         try {
             const formData = new FormData();
@@ -1009,9 +1027,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (data.file_path) activeVideoPath = data.file_path;
                 if (data.location_meta) {
-                    if (hudLocation && data.location_meta.location) hudLocation.textContent = data.location_meta.location;
-                    if (hudCoords && data.location_meta.coordinates) hudCoords.textContent = data.location_meta.coordinates;
-                    if (hudElevation && data.location_meta.elevation_msl) hudElevation.textContent = data.location_meta.elevation_msl;
+                    revealLocationHud(data.location_meta.location, data.location_meta.coordinates, data.location_meta.elevation_msl);
                     if (modelStatsBadge && data.location_meta.model_name) modelStatsBadge.textContent = `${data.location_meta.model_name} • Ingested`;
                 }
             }
@@ -1133,9 +1149,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 updateStageIndicators(pct);
 
-                if (data.location && hudLocation) hudLocation.textContent = data.location;
-                if (data.coordinates && hudCoords) hudCoords.textContent = data.coordinates;
-                if (data.elevation_msl && hudElevation) hudElevation.textContent = data.elevation_msl;
+                if (data.location) {
+                    revealLocationHud(data.location, data.coordinates, data.elevation_msl);
+                }
                 if (data.model_name && modelStatsBadge && data.status === 'processing') {
                     modelStatsBadge.textContent = `${data.model_name} • Processing (${pct}%)`;
                 }
@@ -1201,8 +1217,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------------------------
     init3DViewport();
     loadDroneIntelligence();
-    showVideoPreview('/datasets/saarpolygon_all_1952_images_30fps.mp4', 'saarpolygon_all_1952_images_30fps.mp4');
     
+    // Location HUD and Video Preview are strictly hidden until video is uploaded
+    if (headerHud) headerHud.style.display = 'none';
+    if (videoPreviewWrapper) videoPreviewWrapper.style.display = 'none';
+    if (hudLocation) hudLocation.textContent = '--';
+    if (hudCoords) hudCoords.textContent = '--';
+    if (hudElevation) hudElevation.textContent = '--';
+
     // Model is NOT loaded on startup: ONLY rendered after clicking 'Generate 3D Model'!
     updateStageIndicators(0);
     progressBarFill.style.width = '0%';
@@ -1211,5 +1233,5 @@ document.addEventListener('DOMContentLoaded', () => {
     stageTag.textContent = 'STANDBY';
     if (modelStatsBadge) modelStatsBadge.textContent = '3D Viewport Studio • Standby';
     if (printSpecBadge) printSpecBadge.textContent = '🖨️ 3D Printable • Generates upon reconstruction';
-    logTerminal('[SYSTEM] OmniSplat 3D Engine ready. Upload video or select dataset, then click "Generate 3D Model".', 'info');
+    logTerminal('[SYSTEM] OmniSplat 3D Engine ready. Upload drone video or select dataset to begin.', 'info');
 });

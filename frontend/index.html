@@ -35,27 +35,27 @@
             </div>
         </div>
 
-        <!-- Geospatial Telemetry HUD -->
-        <div class="header-hud">
+        <!-- Geospatial Telemetry HUD (Revealed strictly after drone video upload) -->
+        <div class="header-hud" id="headerHud" style="display: none;">
             <div class="hud-pill">
                 <span class="hud-dot"></span>
                 <span class="hud-label">LOCATION:</span>
-                <span class="hud-val" id="hudLocation">Halde Duhamel, Germany</span>
+                <span class="hud-val" id="hudLocation">--</span>
             </div>
             <div class="hud-pill">
                 <span class="hud-label">GPS:</span>
-                <span class="hud-val mono" id="hudCoords">49°15'04.2"N 6°47'54.8"E</span>
+                <span class="hud-val mono" id="hudCoords">--</span>
             </div>
             <div class="hud-pill">
                 <span class="hud-label">ELEVATION:</span>
-                <span class="hud-val mono" id="hudElevation">360m MSL</span>
+                <span class="hud-val mono" id="hudElevation">--</span>
             </div>
         </div>
 
         <div class="header-actions">
-            <div class="status-pill ready" id="systemStatusChip">
-                <span class="status-indicator pulse"></span>
-                <span>Photoreal 3D Active</span>
+            <div class="status-pill standby" id="systemStatusChip">
+                <span class="status-indicator"></span>
+                <span>Standby • Awaiting Video</span>
             </div>
         </div>
     </header>
@@ -121,8 +121,8 @@
                         </button>
                     </div>
 
-                    <!-- Video Preview Player -->
-                    <div class="preview-container" id="videoPreviewWrapper">
+                    <!-- Video Preview Player (Revealed upon video upload / selection) -->
+                    <div class="preview-container" id="videoPreviewWrapper" style="display: none;">
                         <video id="videoPreview" controls muted playsinline></video>
                         <div class="meta-strip">
                             <span class="meta-item"><strong id="metaRes">1920x1080</strong></span>
@@ -406,6 +406,6 @@
         </section>
     </main>
 
-    <script src="app.js?v=20260915_fix_3d_render"></script>
+    <script src="app.js?v=20260915_location_on_upload"></script>
 </body>
 </html>
